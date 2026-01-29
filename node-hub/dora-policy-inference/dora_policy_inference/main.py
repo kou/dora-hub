@@ -115,12 +115,19 @@ class DoraPolicyInference:
         """Convert camera data from Dora format to numpy."""
         height, width = metadata.get("height"), metadata.get("width")
         encoding = metadata.get("encoding", "rgb8")
-        image = dora_data.to_numpy().reshape(height, width, 3)
+        image = dora_data.to_numpy()
 
+        if encoding == "rgb8":
+            image = image.reshape(height, width, 3)
         if encoding == "bgr8":
+            image = image.reshape(height, width, 3)
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         elif encoding == "yuv420":
+            image = image.reshape(height, width, 3)
             image = cv2.cvtColor(image, cv2.COLOR_YUV2RGB_I420)
+        elif encoding in ["jpeg", "jpg", "jpe", "bmp", "webp", "png"]:
+            image = cv2.imdecode(image, cv2.IMREAD_UNCHANGED)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         return image.astype(np.uint8)
 
